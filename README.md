@@ -24,3 +24,4 @@ Related is also kiosk-mode.
 * [Safe Exam Browser for macOS and iOS](https://github.com/SafeExamBrowser/seb-mac)
 * [Cat-proofing a MacBook keyboard](https://www.mackungfu.org/cat-proofing-a-macbook-keyboard)
 
+(In my case, I needed to baby-proof my Mac.)
