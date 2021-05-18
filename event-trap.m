@@ -1,9 +1,17 @@
-
-
 /*
+Catches all events (mouse, keyboard, everything),
+and either consumes them (locked state)
+or passes them through (unlocked state).
+The locked state can be switched by the magic commands
+(see code below).
 
-compile: clang -o event-trap.bin event-trap.m -framework Cocoa -framework Carbon
+compile:
 
+    clang -o event-trap.bin event-trap.m -framework Cocoa -framework Carbon
+
+run:
+
+    sudo ./event-trap.bin
 */
 
 #include <stdio.h>
@@ -16,6 +24,10 @@ static bool locked = false;
 static int keyPos = 0;
 static char lockStr[] = "lock31337";  // any random str, unlikely to be typed by accident, 0 Google results
 static char unlockStr[] = "unlock";
+
+static const char* getCmdStr() { return locked ? unlockStr : lockStr; }
+static const char* getCmdName() { return locked ? "unlock" : "lock"; }
+static const char* getLockedStateName() { return locked ? "locked" : "unlocked"; }
 
 static char getCharFromKeyCode(CGKeyCode keyCode) {
     TISInputSourceRef currentKeyboard = TISCopyCurrentKeyboardInputSource();
@@ -55,8 +67,8 @@ CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef
         printf(", key code %i", keyCode);
 
         char c = getCharFromKeyCode(keyCode);
-        const char* cmdName = locked ? "unlock" : "lock";
-        const char* cmdStr = locked ? unlockStr : lockStr;
+        const char* cmdName = getCmdName();
+        const char* cmdStr = getCmdStr();
         int cmdStrLen = strlen(cmdStr);
         if(keyPos > cmdStrLen) keyPos = 0;
 
@@ -112,6 +124,10 @@ int main(void) {
     CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
 
     CGEventTapEnable(eventTap, true);
+
+    printf("Event trap is activated.\n");
+    printf("Current state: %s\n", getLockedStateName());
+    printf("Type '%s' to lock, and '%s' to unlock.\n", lockStr, unlockStr);
 
     CFRunLoopRun();
     return 0;
