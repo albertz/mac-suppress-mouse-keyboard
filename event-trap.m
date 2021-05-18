@@ -91,7 +91,7 @@ int main(void) {
     eventTap = CGEventTapCreate(
         kCGSessionEventTap, kCGHeadInsertEventTap, 0, eventMask, myCGEventCallback, NULL);
     if(!eventTap) {
-        fprintf(stderr, "Failed to create event tap for keyboard events\n");
+        fprintf(stderr, "Failed to create event tap.\n");
         return 1;
     }
 
