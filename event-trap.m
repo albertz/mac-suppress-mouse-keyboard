@@ -11,10 +11,10 @@
 //
 //   or ...
 //
-//   b) $ clang -o sniffMK sniffMK.m -framework Cocoa -framework Carbon
+//   b) $ clang -o event-trap.bin event-trap.m -framework Cocoa -framework Carbon
 //
 //   Run (as root):
-//   # ./sniffMK
+//   # sudo ./event-trap.bin
 //
 //  Notes:
 //   a) code, largely based on altermouse.c/alterkeys.c (amit singh/http://osxbook.com)
