@@ -9,7 +9,7 @@ The locked state can be switched by the magic keyboard sequences
 
 ## Installation
 
-    clang -o event-trap.bin event-trap.m -framework Cocoa -framework Carbon
+    clang -o event-trap.bin event-trap.m -framework Cocoa
 
 ## Usage
 

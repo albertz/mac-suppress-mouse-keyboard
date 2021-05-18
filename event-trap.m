@@ -7,7 +7,7 @@ The locked state can be switched by the magic commands
 
 compile:
 
-    clang -o event-trap.bin event-trap.m -framework Cocoa -framework Carbon
+    clang -o event-trap.bin event-trap.m -framework Cocoa
 
 run:
 
@@ -18,7 +18,6 @@ run:
 #include <string.h>
 #import <ApplicationServices/ApplicationServices.h>
 #import <Foundation/Foundation.h>
-#import <Carbon/Carbon.h>
 
 static bool locked = false;
 static int keyPos = 0;
@@ -29,34 +28,6 @@ static const char* getCmdStr() { return locked ? unlockStr : lockStr; }
 static const char* getCmdName() { return locked ? "unlock" : "lock"; }
 static const char* getLockedStateName() { return locked ? "locked" : "unlocked"; }
 
-static char getCharFromKeyCode(CGKeyCode keyCode) {
-    TISInputSourceRef currentKeyboard = TISCopyCurrentKeyboardInputSource();
-    CFDataRef uchr = (CFDataRef)TISGetInputSourceProperty(currentKeyboard, kTISPropertyUnicodeKeyLayoutData);
-    const UCKeyboardLayout *keyboardLayout = (const UCKeyboardLayout*)CFDataGetBytePtr(uchr);
-
-    if(keyboardLayout) {
-        UInt32 deadKeyState = 0;
-        UniCharCount maxStringLength = 16;
-        UniCharCount actualStringLength = 0;
-        UniChar unicodeString[maxStringLength];
-
-        OSStatus status = UCKeyTranslate(
-            keyboardLayout,
-            keyCode, kUCKeyActionDown, 0,
-            LMGetKbdType(), 0,
-            &deadKeyState,
-            maxStringLength,
-            &actualStringLength, unicodeString);
-
-        if(actualStringLength > 0 && status == noErr) {
-            if(unicodeString[0] < 128)
-                return (char) unicodeString[0];
-        }
-    }
-
-    return 0;
-}
-
 CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
     CGEventRef returnEvent = locked ? NULL : event;
 
@@ -66,7 +37,12 @@ CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef
         CGKeyCode keyCode = (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
         printf(", key code %i", keyCode);
 
-        char c = getCharFromKeyCode(keyCode);
+        UniChar keyUniStr[16];
+        UniCharCount keyUniStrLen = 0;
+        CGEventKeyboardGetUnicodeString(
+            event, sizeof(keyUniStr) / sizeof(keyUniStr[0]) - 1, &keyUniStrLen, keyUniStr);
+
+        char c = (keyUniStrLen > 0 && keyUniStr[0] < 128) ? keyUniStr[0] : 0;
         const char* cmdName = getCmdName();
         const char* cmdStr = getCmdStr();
         int cmdStrLen = strlen(cmdStr);
