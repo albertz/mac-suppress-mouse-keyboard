@@ -1,8 +1,23 @@
-# Suppress mouse & keyboard on MacOSX
+# Suppress mouse & keyboard events on MacOSX
+
+Catches all events (mouse, keyboard, everything),
+and either consumes them (locked state)
+or passes them through (unlocked state).
+The locked state can be switched by the magic keyboard sequences
+"lock31337" for locking, or "unlock" for unlocking.
+(Remember this before you run the binary!)
+
+## Installation
+
+    clang -o event-trap.bin event-trap.m -framework Cocoa -framework Carbon
+
+## Usage
+
+    sudo ./event-trap.bin
+
+## References and related work
 
 Related is also kiosk-mode.
-
-## References
 
 * [Installation up 4evr](https://github.com/laserpilot/Installation_Up_4evr)
 * [filmothek-mavericks-kiosk](https://github.com/tschiemer/filmothek-kiosk-osx)
