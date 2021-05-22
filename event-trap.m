@@ -16,6 +16,7 @@ run:
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #import <ApplicationServices/ApplicationServices.h>
 #import <Foundation/Foundation.h>
 
@@ -42,7 +43,7 @@ CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef
         CGEventKeyboardGetUnicodeString(
             event, sizeof(keyUniStr) / sizeof(keyUniStr[0]) - 1, &keyUniStrLen, keyUniStr);
 
-        char c = (keyUniStrLen > 0 && keyUniStr[0] < 128) ? keyUniStr[0] : 0;
+        char c = (keyUniStrLen > 0 && keyUniStr[0] < 128) ? tolower(keyUniStr[0]) : 0;
         const char* cmdName = getCmdName();
         const char* cmdStr = getCmdStr();
         int cmdStrLen = strlen(cmdStr);
