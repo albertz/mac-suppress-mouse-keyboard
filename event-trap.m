@@ -22,9 +22,11 @@ run:
 #import <Cocoa/Cocoa.h>
 
 
-static void showHudForKey(char c) {
+static void showHud(NSString* text, int width, int height, CGFloat duration, int fontSize) {
 
     NSWindow* window = [NSWindow new];
+    [window setFrame:NSMakeRect(0,0,width,height) display:NO];
+    [window center];
 
     window.titleVisibility = NSWindowTitleHidden;
     window.styleMask = NSWindowStyleMaskBorderless;
@@ -66,13 +68,15 @@ static void showHudForKey(char c) {
     [label setEditable:NO];
     [label setSelectable:NO];
     
-    label.stringValue = [NSString stringWithFormat:@"%c", c];
+    label.stringValue = text;
     label.alignment = NSTextAlignmentCenter;
     label.textColor = [NSColor whiteColor];
     label.backgroundColor = [NSColor clearColor];
-    label.font = [NSFont fontWithName:@"Arial-BoldMT" size:50];
+    label.font = [NSFont fontWithName:@"Arial-BoldMT" size:fontSize];
 
-    NSSize strSize = [label.attributedStringValue size];
+    //NSRect titleRect = [label titleRectForBounds:view.bounds];
+    NSSize cellSize = [label.cell cellSizeForBounds:view.bounds];
+    NSSize strSize = cellSize; // [label.attributedStringValue size];
     NSRect frame = view.frame;
     frame.origin.y = frame.size.height / 2 -  strSize.height / 2;
     frame.size.height = strSize.height;
@@ -81,13 +85,14 @@ static void showHudForKey(char c) {
     [view addSubview:label];
 
     [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
-        context.duration = 0.25;
+        context.duration = duration;
         window.animator.alphaValue = 0.;
     } completionHandler:^{
         [window close];
     }];
 
 }
+
 
 static bool locked = false;
 static int keyPos = 0;
@@ -119,17 +124,25 @@ static CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGE
         if(keyPos > cmdStrLen) keyPos = 0;
 
         printf(", char %i (expected %i)", c, cmdStr[keyPos]);
-        if(locked && c)
-            showHudForKey(toupper(c));
+        if(locked && c && c != cmdStr[keyPos]) {
+            showHud(
+                [NSString stringWithFormat:@"Pressed '%c'.\n\n(Type '%s' to unlock.)", toupper(c), unlockStr],
+                400, 200, 1., 30);
+        }
 
         if(c == cmdStr[keyPos] || c == cmdStr[0]) {
             if(c != cmdStr[keyPos] && c == cmdStr[0]) keyPos = 0;
             ++keyPos;
             printf(", match (pos %i, len %i), remaining '%s'", keyPos, cmdStrLen, cmdStr + keyPos);
+            if(keyPos < cmdStrLen && locked)
+                showHud([NSString stringWithFormat:@"%c", toupper(c)], 100, 100, 0.5, 50);
             if(keyPos >= cmdStrLen) {
                 printf(", %s!", cmdName);
                 locked = !locked;
                 keyPos = 0;
+                showHud(
+                    [NSString stringWithFormat:@"%s!", cmdName],
+                    200, 100, 2., 40);
             }
         }
         else {
@@ -142,6 +155,22 @@ static CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGE
 
     return returnEvent;
 }
+
+
+
+@interface AppDelegate : NSObject <NSApplicationDelegate> {}
+@end
+
+@implementation AppDelegate
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    showHud(
+        [NSString stringWithFormat:@"Hello!\n\nType:\n'%s' to lock,\n'%s' to unlock.", lockStr, unlockStr],
+        400, 200, 10., 20);
+}
+
+@end
+
 
 int main(int argc, const char * argv[]) {
     CGEventMask eventMask;
@@ -180,7 +209,7 @@ int main(int argc, const char * argv[]) {
 
     // like NSApplicationMain(argc, argv)
     [NSApplication sharedApplication];
-    // no delegate needed
+    [NSApp setDelegate:[AppDelegate new]];
     [NSApp run];
 
     // We normally would not reach this code.
