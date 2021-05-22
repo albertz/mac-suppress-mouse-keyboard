@@ -51,7 +51,8 @@ CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef
 
         printf(", char %i (expected %i)", c, cmdStr[keyPos]);
 
-        if(c == cmdStr[keyPos]) {
+        if(c == cmdStr[keyPos] || c == cmdStr[0]) {
+            if(c != cmdStr[keyPos] && c == cmdStr[0]) keyPos = 0;
             ++keyPos;
             printf(", match (pos %i, len %i), remaining '%s'", keyPos, cmdStrLen, cmdStr + keyPos);
             if(keyPos >= cmdStrLen) {
