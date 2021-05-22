@@ -19,6 +19,75 @@ run:
 #include <ctype.h>
 #import <ApplicationServices/ApplicationServices.h>
 #import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
+
+
+static void showHudForKey(char c) {
+
+    NSWindow* window = [NSWindow new];
+
+    window.titleVisibility = NSWindowTitleHidden;
+    window.styleMask = NSWindowStyleMaskBorderless;
+    window.alphaValue = 0.9;
+    window.movableByWindowBackground = YES;
+
+    [window setLevel: NSStatusWindowLevel];
+    [window setBackgroundColor: [NSColor clearColor]];
+    [window setOpaque:NO];
+    //[window setHasShadow:NO];
+
+    [window makeKeyAndOrderFront:NSApp];
+
+    NSVisualEffectView *view = [[NSVisualEffectView new] initWithFrame:window.contentView.bounds];;
+
+    view.translatesAutoresizingMaskIntoConstraints = NO;
+
+    [view setBlendingMode:NSVisualEffectBlendingModeBehindWindow];
+    [view setMaterial:NSVisualEffectMaterialDark];
+    [view setState:NSVisualEffectStateActive];
+
+    //[view setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
+
+    //[view setWantsLayer:NO];
+    [view setWantsLayer:YES];
+    view.layer.cornerRadius = 16.;
+    //view.layer.shouldRasterize = YES;
+    //view.layer.rasterizationScale = 0.45;
+    view.layer.shadowOpacity = 0.1; //0.01;
+    view.layer.edgeAntialiasingMask = kCALayerTopEdge | kCALayerBottomEdge | kCALayerRightEdge | kCALayerLeftEdge;
+
+    [window.contentView addSubview:view];
+    //window.contentView = view;
+
+    NSTextField *label = [[NSTextField alloc] initWithFrame:view.bounds];
+
+    [label setBezeled:NO];
+    [label setDrawsBackground:NO];
+    [label setEditable:NO];
+    [label setSelectable:NO];
+    
+    label.stringValue = [NSString stringWithFormat:@"%c", c];
+    label.alignment = NSTextAlignmentCenter;
+    label.textColor = [NSColor whiteColor];
+    label.backgroundColor = [NSColor clearColor];
+    label.font = [NSFont fontWithName:@"Arial-BoldMT" size:50];
+
+    NSSize strSize = [label.attributedStringValue size];
+    NSRect frame = view.frame;
+    frame.origin.y = frame.size.height / 2 -  strSize.height / 2;
+    frame.size.height = strSize.height;
+    label.frame = frame;
+ 
+    [view addSubview:label];
+
+    [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+        context.duration = 0.25;
+        window.animator.alphaValue = 0.;
+    } completionHandler:^{
+        [window close];
+    }];
+
+}
 
 static bool locked = false;
 static int keyPos = 0;
@@ -29,7 +98,7 @@ static const char* getCmdStr() { return locked ? unlockStr : lockStr; }
 static const char* getCmdName() { return locked ? "unlock" : "lock"; }
 static const char* getLockedStateName() { return locked ? "locked" : "unlocked"; }
 
-CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
+static CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
     CGEventRef returnEvent = locked ? NULL : event;
 
     if(type == kCGEventKeyDown) {
@@ -50,6 +119,8 @@ CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef
         if(keyPos > cmdStrLen) keyPos = 0;
 
         printf(", char %i (expected %i)", c, cmdStr[keyPos]);
+        if(locked && c)
+            showHudForKey(toupper(c));
 
         if(c == cmdStr[keyPos] || c == cmdStr[0]) {
             if(c != cmdStr[keyPos] && c == cmdStr[0]) keyPos = 0;
@@ -72,7 +143,7 @@ CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     return returnEvent;
 }
 
-int main(void) {
+int main(int argc, const char * argv[]) {
     CGEventMask eventMask;
     CFMachPortRef eventTap;
 
@@ -107,6 +178,13 @@ int main(void) {
     printf("Current state: %s\n", getLockedStateName());
     printf("Type '%s' to lock, and '%s' to unlock.\n", lockStr, unlockStr);
 
+    // like NSApplicationMain(argc, argv)
+    [NSApplication sharedApplication];
+    // no delegate needed
+    [NSApp run];
+
+    // We normally would not reach this code.
+    // But this would be used if we would not use the NSApp main loop above.
     CFRunLoopRun();
     return 0;
 }
