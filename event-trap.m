@@ -159,10 +159,10 @@ static CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGE
         CGEventTapEnable(eventTap, true);
     }
 
-    if(type == kCGEventTapDisabledByUserInput) {
+    /*if(type == kCGEventTapDisabledByUserInput) {
         printf("kCGEventTapDisabledByUserInput\n");
         CGEventTapEnable(eventTap, true);
-    }
+    }*/
 
     return returnEvent;
 }
