@@ -13,7 +13,7 @@ The locked state can be switched by the magic keyboard sequences
 
 ## Usage
 
-    sudo ./event-trap.bin
+    ./event-trap.bin
 
 ## References and related work
 
