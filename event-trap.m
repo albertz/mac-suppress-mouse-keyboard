@@ -98,6 +98,7 @@ static bool locked = false;
 static int keyPos = 0;
 static char lockStr[] = "lock31337";  // any random str, unlikely to be typed by accident, 0 Google results
 static char unlockStr[] = "unlock";
+static CFMachPortRef eventTap;
 
 static const char* getCmdStr() { return locked ? unlockStr : lockStr; }
 static const char* getCmdName() { return locked ? "unlock" : "lock"; }
@@ -153,6 +154,16 @@ static CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGE
         printf("\n");
     }
 
+    if(type == kCGEventTapDisabledByTimeout) {
+        printf("kCGEventTapDisabledByTimeout\n");
+        CGEventTapEnable(eventTap, true);
+    }
+
+    if(type == kCGEventTapDisabledByUserInput) {
+        printf("kCGEventTapDisabledByUserInput\n");
+        CGEventTapEnable(eventTap, true);
+    }
+
     return returnEvent;
 }
 
@@ -174,7 +185,6 @@ static CGEventRef myCGEventCallback(CGEventTapProxy proxy, CGEventType type, CGE
 
 int main(int argc, const char * argv[]) {
     CGEventMask eventMask;
-    CFMachPortRef eventTap;
 
     // First test for key events. This fails when we are not allowed to do so.
     // We should be allowed by either being root (sudo),
