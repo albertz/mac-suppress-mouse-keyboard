@@ -45,8 +45,9 @@ static void showHud(NSString* text, int width, int height, CGFloat duration, int
     view.translatesAutoresizingMaskIntoConstraints = NO;
 
     [view setBlendingMode:NSVisualEffectBlendingModeBehindWindow];
-    [view setMaterial:NSVisualEffectMaterialDark];
+    [view setMaterial:NSVisualEffectMaterialHUDWindow];
     [view setState:NSVisualEffectStateActive];
+    [view setEmphasized:YES];
 
     //[view setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
 
@@ -70,7 +71,7 @@ static void showHud(NSString* text, int width, int height, CGFloat duration, int
     
     label.stringValue = text;
     label.alignment = NSTextAlignmentCenter;
-    label.textColor = [NSColor whiteColor];
+    // label.textColor = [NSColor whiteColor];
     label.backgroundColor = [NSColor clearColor];
     label.font = [NSFont fontWithName:@"Arial-BoldMT" size:fontSize];
 
