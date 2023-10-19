@@ -23,5 +23,7 @@ Related is also kiosk-mode.
 * [filmothek-mavericks-kiosk](https://github.com/tschiemer/filmothek-kiosk-osx)
 * [Safe Exam Browser for macOS and iOS](https://github.com/SafeExamBrowser/seb-mac)
 * [Cat-proofing a MacBook keyboard](https://www.mackungfu.org/cat-proofing-a-macbook-keyboard)
+* [PawSense - catproof your computer](https://www.bitboost.com/pawsense/)
+* [KeyboardCleanTool](https://folivora.ai/keyboardcleantool) ([HN](https://news.ycombinator.com/item?id=37935506))
 
 (In my case, I needed to baby-proof my Mac.)
